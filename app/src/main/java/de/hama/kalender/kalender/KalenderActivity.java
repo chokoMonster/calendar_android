@@ -1,6 +1,7 @@
 package de.hama.kalender.kalender;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -25,7 +26,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -70,6 +75,9 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
         switch (item.getItemId()) {
             case R.id.menu1:
                 Toast.makeText(this, "1", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.menuNew:
+                startActivity(new Intent(KalenderActivity.this, NewEntryActivity.class));
                 return true;
         }
         return true;
@@ -130,6 +138,8 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
         entries.add(c4);
         entries.add(c5);
         entries.add(c6);*/
+
+
 
         AsyncCalendarTask asyncCalendarTask = new AsyncCalendarTask();
         asyncCalendarTask.execute("gerkat", calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR));
@@ -251,10 +261,22 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
 
         @Override
         protected JSONArray doInBackground(Object[] objects) {
-            String anfrage="http://192.168.2.102/android/php/getEintraege.php?id="+objects[0]+"&monat="+objects[1]+"&jahr="+objects[2];
-            Log.i("ANFRAGE", anfrage);
+
+            /*try {
+                InetAddress.getByName("192.168.2.102").isReachable(2000);
+            } catch (IOException e) {
+                return null;
+            }*/
+
             try {
-                URL url = new URL(anfrage);
+                new Socket().connect(new InetSocketAddress("192.168.2.102", 80), 2000);
+            } catch(IOException e) {
+                return null;
+            }
+
+            String request="http://192.168.2.102/android/php/getEintraege.php?id="+objects[0]+"&monat="+objects[1]+"&jahr="+objects[2];
+            try {
+                URL url = new URL(request);
                 httpURLConnection = (HttpURLConnection) url.openConnection();
 
                 InputStream input = httpURLConnection.getInputStream();
