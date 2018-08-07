@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Kalender</string>
+    <string name="previous"><![CDATA[<<]]></string>
+    <string name="next"><![CDATA[>>]]></string>
+    <string-array name="arrayMonths">
+        <item>Januar</item><item>Februar</item><item>März</item><item>April</item><item>Mai</item><item>Juni</item>
+        <item>Juli</item><item>August</item><item>September</item><item>Oktober</item><item>November</item><item>Dezember</item>
+    </string-array>
+    <string-array name="weekdays">
+        <item>Mo</item><item>Di</item><item>Mi</item><item>Do</item><item>Fr</item><item>Sa</item><item>So</item>
+    </string-array>
+</resources>

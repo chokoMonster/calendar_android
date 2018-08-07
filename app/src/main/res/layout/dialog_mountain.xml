@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <TableRow
+        android:layout_marginTop="20dp">
+        <TextView
+            android:text="Start:"
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="20dp"/>
+        <EditText
+            android:id="@+id/txtDate"
+            android:inputType="date"
+            android:text="01.01.2018"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </TableRow>
+
+    <TableRow>
+        <TextView
+            android:text="Anzahl:"
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="20dp"/>
+        <EditText
+            android:id="@+id/txtCount"
+            android:text="0"
+            android:inputType="number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/btnMinus"
+            android:text="-"
+            android:layout_width="50dp"
+            android:layout_marginLeft="10dp"/>
+        <Button
+            android:id="@+id/btnPlus"
+            android:text="+"
+            android:layout_width="50dp"/>
+    </TableRow>
+</TableLayout>

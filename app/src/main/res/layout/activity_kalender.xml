@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    tools:context=".KalenderActivity">
+
+    <TableRow>
+
+        <TextView
+            android:id="@+id/lblPlayer"
+            android:layout_span="3"
+            android:layout_weight="1"
+            android:text="Test" />
+    </TableRow>
+
+    <TableRow>
+        <Button
+            android:id="@+id/btnPrevious"
+            android:text="@string/previous" />
+        <TextView
+            android:id="@+id/lblMonth"
+            android:layout_weight="1"
+            android:textSize="16dp"
+            android:textAlignment="center"
+            android:text="" />
+        <Button
+            android:id="@+id/btnNext"
+            android:text="@string/next" />
+    </TableRow>
+
+    <TableRow>
+        <!--android:columnWidth="90dp"
+        android:verticalSpacing="10dp"
+        android:horizontalSpacing="10dp"-->
+        <GridView
+            android:id="@+id/gridview"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_weight="1"
+            android:layout_span="3"
+            android:gravity="center"
+            android:horizontalSpacing="10dp"
+            android:numColumns="7"
+            android:stretchMode="columnWidth"
+            android:textAlignment="center" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content">
+        <ListView
+            android:id="@+id/lstEntry"
+            android:layout_span="3"
+            android:layout_weight="1"/>
+    </TableRow>
+
+</TableLayout>
