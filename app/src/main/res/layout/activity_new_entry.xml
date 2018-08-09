@@ -7,10 +7,94 @@
     tools:context=".KalenderActivity">
 
     <TableRow>
-
         <TextView
+            android:layout_span="2"
+            android:layout_weight="1"
+            android:layout_marginTop="10dp"
+            android:text="Datum" />
+    </TableRow>
+    <TableRow>
+        <Button
             android:id="@+id/txtDateDisplay"
-            android:clickable="true" />
+            android:layout_weight="1"
+            android:gravity="left|center_vertical"
+            android:text="test123" />
+    </TableRow>
+
+    <TableRow>
+        <TextView
+            android:layout_span="2"
+            android:layout_weight="1"
+            android:layout_marginTop="10dp"
+            android:text="Zeitraum" />
+    </TableRow>
+    <TableRow>
+        <Button
+            android:id="@+id/txtStart"
+            android:layout_weight="1"
+            android:text="00:00" />
+
+        <Button
+            android:id="@+id/txtEnd"
+            android:layout_weight="1"
+            android:text="00:00" />
+    </TableRow>
+
+    <TableRow>
+        <TextView
+            android:layout_span="2"
+            android:layout_weight="1"
+            android:layout_marginTop="10dp"
+            android:text="Kategorie" />
+    </TableRow>
+    <TableRow>
+        <Button
+            android:id="@+id/btnType"
+            android:layout_span="2"
+            android:layout_weight="1" />
+    </TableRow>
+
+    <TableRow>
+        <TextView
+            android:layout_span="2"
+            android:layout_weight="1"
+            android:layout_marginTop="10dp"
+            android:text="Intensität" />
+    </TableRow>
+    <TableRow>
+        <SeekBar
+            android:id="@+id/sliderIntensity"
+            android:layout_span="2"
+            android:layout_weight="1"
+            android:max="10"
+            android:progress="5" />
+    </TableRow>
+
+    <TableRow>
+        <TextView
+            android:layout_span="2"
+            android:layout_weight="1"
+            android:layout_marginTop="10dp"
+            android:text="Bemerkung" />
+    </TableRow>
+    <TableRow>
+        <EditText
+            android:id="@+id/txtComment"
+            android:layout_span="2"
+            android:layout_weight="1" />
+    </TableRow>
+
+    <TableRow
+        android:layout_marginTop="25dp">
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_weight="1"
+            android:text="Speichern" />
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:text="Abbrechen"
+            android:layout_weight="1" />
     </TableRow>
 
 </TableLayout>
