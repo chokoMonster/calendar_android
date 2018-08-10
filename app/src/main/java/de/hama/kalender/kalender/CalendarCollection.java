@@ -1,10 +1,12 @@
 package de.hama.kalender.kalender;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class CalendarCollection {
-    private String user, type, comment, league, age, coach, start, end;
+public class CalendarCollection implements Serializable {
+    private String user, comment, league, age, coach, start, end;
+    private CategoryEnum type;
     private Integer intensity;
     private Date date;
 
@@ -21,11 +23,11 @@ public class CalendarCollection {
         this.user = user;
     }
 
-    public String getType() {
+    public CategoryEnum getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(CategoryEnum type) {
         this.type = type;
     }
 

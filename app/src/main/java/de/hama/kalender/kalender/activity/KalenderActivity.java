@@ -1,11 +1,10 @@
-package de.hama.kalender.kalender;
+package de.hama.kalender.kalender.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -26,11 +25,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -39,6 +36,13 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import de.hama.kalender.kalender.CalendarCollection;
+import de.hama.kalender.kalender.CategoryEnum;
+import de.hama.kalender.kalender.adapter.EntryAdapter;
+import de.hama.kalender.kalender.EntryDialog;
+import de.hama.kalender.kalender.adapter.KalenderAdapter;
+import de.hama.kalender.kalender.R;
 
 public class KalenderActivity extends AppCompatActivity implements View.OnClickListener { //FragmentActivity {
 
@@ -93,7 +97,7 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void loadEntries() {
-        /*entries = new ArrayList<>();
+        entries = new ArrayList<>();
 
         Date d=null, d1=null, d2=null, d3=null;
         try {
@@ -110,13 +114,13 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
         CalendarCollection c4 = new CalendarCollection("test2",  d3);
         CalendarCollection c5 = new CalendarCollection("test2",  d2);
         CalendarCollection c6 = new CalendarCollection("test2",  d2);
-        c.setType("basketball1");
-        c1.setType("swimming1");
-        c2.setType("running1");
-        c3.setType("cycling1");
-        c4.setType("power1");
-        c5.setType("others1");
-        c6.setType("pokal");
+        c.setType(CategoryEnum.BASKETBALL);
+        c1.setType(CategoryEnum.SWIMMING);
+        c2.setType(CategoryEnum.RUNNING);
+        c3.setType(CategoryEnum.CYCLING);
+        c4.setType(CategoryEnum.POWER);
+        c5.setType(CategoryEnum.OTHER);
+        c6.setType(CategoryEnum.GAME);
         c.setStart("11:00");
         c.setEnd("12:00");
         c1.setStart("10:00");
@@ -137,12 +141,12 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
         entries.add(c3);
         entries.add(c4);
         entries.add(c5);
-        entries.add(c6);*/
+        entries.add(c6);
 
 
 
-        AsyncCalendarTask asyncCalendarTask = new AsyncCalendarTask();
-        asyncCalendarTask.execute("gerkat", calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR));
+        //AsyncCalendarTask asyncCalendarTask = new AsyncCalendarTask();
+        //asyncCalendarTask.execute("gerkat", calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR));
 
         /*try {
             asyncCalendarTask.execute("gerkat", calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR)).get();
@@ -151,6 +155,10 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
         } catch (ExecutionException e) {
             e.printStackTrace();
         }*/
+    }
+
+    public ArrayList<CalendarCollection> getEntries() {
+        return entries;
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -222,6 +230,13 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Toast.makeText(getApplicationContext(), entries.get(i).getType().toString(), Toast.LENGTH_SHORT).show();
+
+                EntryDialog dialog = new EntryDialog();
+                Bundle args = new Bundle();
+                args.putInt("test", i);
+                args.putSerializable("entry", entries.get(i));
+                dialog.setArguments(args);
+                dialog.show(getSupportFragmentManager(), "ENTRY");
             }
         });
     }
@@ -326,7 +341,7 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
                     JSONObject jo = (JSONObject) json.get(i);
                     //TODO
                     CalendarCollection collection = new CalendarCollection(jo.getString("BENUTZER"), new SimpleDateFormat("yyyy-MM-dd").parse(jo.getString("DATUM")));
-                    collection.setType(jo.getString("ART"));
+                    collection.setType(CategoryEnum.valueOf(jo.getString("ART")));
                     collection.setComment(jo.getString("BEMERKUNG"));
                     if(collection.getType().equals("SPIEL")) {
                         //TODO Gegner

@@ -1,7 +1,6 @@
-package de.hama.kalender.kalender;
+package de.hama.kalender.kalender.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -9,6 +8,9 @@ import android.widget.TextView;
 
 import java.util.Arrays;
 import java.util.List;
+
+import de.hama.kalender.kalender.CalendarCollection;
+import de.hama.kalender.kalender.R;
 
 public class KalenderAdapter extends BaseAdapter {
 

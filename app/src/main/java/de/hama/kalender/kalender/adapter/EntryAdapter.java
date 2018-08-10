@@ -1,4 +1,4 @@
-package de.hama.kalender.kalender;
+package de.hama.kalender.kalender.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -7,9 +7,11 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
+
+import de.hama.kalender.kalender.CalendarCollection;
+import de.hama.kalender.kalender.R;
 
 public class EntryAdapter extends BaseAdapter {
 
@@ -58,7 +60,7 @@ public class EntryAdapter extends BaseAdapter {
         viewHolder.lblDescription.setText(entry.getComment());
 
         if(entry.getType()!=null) {
-            viewHolder.imageView.setImageResource(this.getMipmapIdByName(entry.getType()));
+            viewHolder.imageView.setImageResource(this.getMipmapIdByName(entry.getType().toString().toLowerCase()));
         } else {
             viewHolder.imageView.setImageBitmap(null);
         }
@@ -66,8 +68,7 @@ public class EntryAdapter extends BaseAdapter {
     }
 
     private int getMipmapIdByName(String value)  {
-        String packageName = context.getPackageName();
-        return context.getResources().getIdentifier(value, "mipmap", packageName);
+        return context.getResources().getIdentifier(value, "mipmap", context.getPackageName());
     }
 
     static class ViewHolder {

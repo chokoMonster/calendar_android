@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    tools:context=".KalenderActivity">
+    tools:context=".activity.KalenderActivity">
 
     <TableRow>
         <TextView
@@ -49,7 +49,7 @@
     </TableRow>
     <TableRow>
         <Button
-            android:id="@+id/btnType"
+            android:id="@+id/txtType"
             android:layout_span="2"
             android:layout_weight="1" />
     </TableRow>

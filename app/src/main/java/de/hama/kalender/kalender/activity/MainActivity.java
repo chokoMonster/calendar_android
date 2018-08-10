@@ -1,4 +1,4 @@
-package de.hama.kalender.kalender;
+package de.hama.kalender.kalender.activity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -12,6 +12,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+
+import de.hama.kalender.kalender.R;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 

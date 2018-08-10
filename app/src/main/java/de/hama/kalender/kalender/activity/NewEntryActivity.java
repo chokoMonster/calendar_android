@@ -1,4 +1,4 @@
-package de.hama.kalender.kalender;
+package de.hama.kalender.kalender.activity;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -6,32 +6,34 @@ import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.SeekBar;
-import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
+
+import de.hama.kalender.kalender.CalendarCollection;
+import de.hama.kalender.kalender.CategoryEnum;
+import de.hama.kalender.kalender.EntryDialog;
+import de.hama.kalender.kalender.R;
 
 public class NewEntryActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private TextView txtDateDisplay;
-    private EditText txtStart, txtComment;
-    private Button txtEnd;
-    private Button btnType, btnSave, btnCancel;
+    private EditText txtComment;
+    private Button txtDateDisplay, txtStart, txtEnd, txtType, btnSave, btnCancel;
     private SeekBar sliderIntensity;
     private Calendar calendar;
     private boolean start;
+    private CalendarCollection entry;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -41,7 +43,6 @@ public class NewEntryActivity extends AppCompatActivity implements View.OnClickL
         calendar = Calendar.getInstance();
 
         txtDateDisplay = findViewById(R.id.txtDateDisplay);
-        //txtDateDisplay.setEnabled(false);
         txtDateDisplay.setText(new SimpleDateFormat("dd.MM.yyyy", Locale.GERMAN).format(calendar.getTime()));
         txtDateDisplay.setOnClickListener(this);
 
@@ -50,8 +51,8 @@ public class NewEntryActivity extends AppCompatActivity implements View.OnClickL
         txtStart.setOnClickListener(this);
         txtEnd.setOnClickListener(this);
 
-        btnType = findViewById(R.id.btnType);
-        btnType.setOnClickListener(this);
+        txtType = findViewById(R.id.txtType);
+        txtType.setOnClickListener(this);
 
         sliderIntensity = findViewById(R.id.sliderIntensity);
         txtComment = findViewById(R.id.txtComment);
@@ -60,6 +61,13 @@ public class NewEntryActivity extends AppCompatActivity implements View.OnClickL
         btnSave.setOnClickListener(this);
         btnCancel = findViewById(R.id.btnCancel);
         btnCancel.setOnClickListener(this);
+
+        try {
+            entry = (CalendarCollection) getIntent().getExtras().get(EntryDialog.KEY);
+            if (entry != null) {
+                setValues();
+            }
+        } catch(NullPointerException e) {}
     }
 
     @Override
@@ -72,7 +80,7 @@ public class NewEntryActivity extends AppCompatActivity implements View.OnClickL
         } else if(view==txtEnd) {
             start=false;
             new TimePickerDialog(NewEntryActivity.this, AlertDialog.THEME_HOLO_DARK, timeSetListener, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show();
-        } else if(view==btnType) {
+        } else if(view==txtType) {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(NewEntryActivity.this).setTitle("Kategorie wählen").setCancelable(false);
             final String[] categories = getResources().getStringArray(R.array.arrayTypes);
             dialogBuilder.setItems(categories, new DialogInterface.OnClickListener() {
@@ -80,7 +88,7 @@ public class NewEntryActivity extends AppCompatActivity implements View.OnClickL
                 public void onClick(DialogInterface dialogInterface, int i) {
                     dialogInterface.dismiss();
                     //btnType.setText(Arrays.asList(getResources().getStringArray(R.array.arrayTankstellen)).get(i));
-                    btnType.setText(categories[i]);
+                    txtType.setText(categories[i]);
                 }
             });
             dialogBuilder.create().show();
@@ -118,7 +126,11 @@ public class NewEntryActivity extends AppCompatActivity implements View.OnClickL
 
     private void saveEntry() {
         CalendarCollection entry = new CalendarCollection("gerkat", calendar.getTime());
-        entry.setType(btnType.getText().toString());
+        for (CategoryEnum e: CategoryEnum.values()) {
+            if(e.getValue().equals(txtType.getText().toString())) {
+                entry.setType(e);
+            }
+        }
         entry.setStart(txtStart.getText().toString());
         entry.setEnd(txtEnd.getText().toString());
         entry.setIntensity(sliderIntensity.getProgress());
@@ -126,5 +138,14 @@ public class NewEntryActivity extends AppCompatActivity implements View.OnClickL
 
         Gson gson = new Gson();
         String json = gson.toJson(entry);
+    }
+
+    private void setValues() {
+        txtDateDisplay.setText(entry.getFormattedDate());
+        txtStart.setText(entry.getStart());
+        txtEnd.setText(entry.getEnd());
+        txtType.setText(entry.getType().getValue());
+        //sliderIntensity.setProgress(entry.getIntensity());
+        txtComment.setText(entry.getComment());
     }
 }
