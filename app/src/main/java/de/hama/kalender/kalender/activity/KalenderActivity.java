@@ -40,7 +40,7 @@ import java.util.List;
 import de.hama.kalender.kalender.CalendarCollection;
 import de.hama.kalender.kalender.CategoryEnum;
 import de.hama.kalender.kalender.adapter.EntryAdapter;
-import de.hama.kalender.kalender.EntryDialog;
+import de.hama.kalender.kalender.dialog.EntryDialog;
 import de.hama.kalender.kalender.adapter.KalenderAdapter;
 import de.hama.kalender.kalender.R;
 
@@ -185,7 +185,9 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction()==MotionEvent.ACTION_DOWN) {
                     positionX=motionEvent.getX();
+                    Toast.makeText(getApplicationContext(), "DOWN", Toast.LENGTH_SHORT).show();
                 } else if(motionEvent.getAction()==MotionEvent.ACTION_UP) {
+                    Toast.makeText(getApplicationContext(), "UP", Toast.LENGTH_SHORT).show();
                     if(motionEvent.getX()>(positionX+300)) {
                         setDate(-1);
                     } else if(motionEvent.getX()<(positionX-300)) {

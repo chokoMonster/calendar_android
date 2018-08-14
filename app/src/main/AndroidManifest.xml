@@ -20,6 +20,8 @@
         </activity>
         <activity android:name=".activity.KalenderActivity"></activity>
         <activity android:name=".activity.NewEntryActivity"></activity>
+        <activity android:name=".activity.MountainStatisticsActivity"></activity>
+        <activity android:screenOrientation="landscape" android:configChanges="orientation|keyboardHidden" android:name="org.achartengine.GraphicalActivity" />
     </application>
 
 </manifest>

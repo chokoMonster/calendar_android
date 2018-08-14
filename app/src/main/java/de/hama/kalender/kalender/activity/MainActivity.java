@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private Button btnKalender;
     private ImageButton btnMountain;
+    private Button btnMountainStatistics;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +31,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         btnMountain = findViewById(R.id.btnMountain);
         btnMountain.setOnClickListener(this);
+
+        btnMountainStatistics = findViewById(R.id.btnMountainStatistics);
+        btnMountainStatistics.setOnClickListener(this);
     }
 
     @Override
@@ -39,6 +43,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if(view==btnMountain) {
             CustomDialog customDialog = new CustomDialog();
             customDialog.show(getSupportFragmentManager(), "MOUNTAIN");
+        } else if(view==btnMountainStatistics) {
+            startActivity(new Intent(MainActivity.this, MountainStatisticsActivity.class));
         }
     }
 

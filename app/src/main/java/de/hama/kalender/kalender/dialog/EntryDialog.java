@@ -1,4 +1,4 @@
-package de.hama.kalender.kalender;
+package de.hama.kalender.kalender.dialog;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -11,6 +11,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 
+import de.hama.kalender.kalender.CalendarCollection;
+import de.hama.kalender.kalender.R;
 import de.hama.kalender.kalender.activity.NewEntryActivity;
 
 public class EntryDialog extends DialogFragment {

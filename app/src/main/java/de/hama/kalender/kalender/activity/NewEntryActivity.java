@@ -12,18 +12,16 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 import de.hama.kalender.kalender.CalendarCollection;
 import de.hama.kalender.kalender.CategoryEnum;
-import de.hama.kalender.kalender.EntryDialog;
+import de.hama.kalender.kalender.dialog.EntryDialog;
 import de.hama.kalender.kalender.R;
 
 public class NewEntryActivity extends AppCompatActivity implements View.OnClickListener {
