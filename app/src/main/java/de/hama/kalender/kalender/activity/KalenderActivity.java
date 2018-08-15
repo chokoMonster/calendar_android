@@ -271,8 +271,7 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
         private BufferedReader bufferedReader;
 
         @Override
-        protected void
-        onPreExecute() {
+        protected void onPreExecute() {
             //progressBar.setVisibility(ProgressBar.VISIBLE);
         }
 

@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
@@ -24,29 +25,46 @@ import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.ListView;
 import android.widget.NumberPicker;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import org.achartengine.ChartFactory;
-import org.achartengine.GraphicalView;
 import org.achartengine.chart.PointStyle;
 import org.achartengine.model.TimeSeries;
 import org.achartengine.model.XYMultipleSeriesDataset;
-import org.achartengine.model.XYSeries;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import de.hama.kalender.kalender.CalendarCollection;
+import de.hama.kalender.kalender.CategoryEnum;
 import de.hama.kalender.kalender.R;
 import de.hama.kalender.kalender.entity.Gear;
 
 public class MountainStatisticsActivity extends AppCompatActivity {
 
     private ListView lstMountain;
+    private ProgressBar progressBar;
     private DatabaseHelper databaseHelper;
     private Calendar calendar;
 
@@ -68,6 +86,9 @@ public class MountainStatisticsActivity extends AppCompatActivity {
 
         lstMountain = findViewById(R.id.lstMountain);
         registerForContextMenu(lstMountain);
+
+        progressBar = findViewById(R.id.progressBarGear);
+        progressBar.setVisibility(ProgressBar.INVISIBLE);
 
         refreshList();
     }
@@ -102,7 +123,7 @@ public class MountainStatisticsActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.menuNewMountain:
                 new DatePickerDialog(MountainStatisticsActivity.this, AlertDialog.THEME_HOLO_DARK, dateSetListener, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
-                return true;
+                break;
             case R.id.menuGraphic:
                 TimeSeries series = new TimeSeries("Gear course - Marienhöhe");
                 for (int i = 0; i < gearList.size(); i++) {
@@ -124,7 +145,8 @@ public class MountainStatisticsActivity extends AppCompatActivity {
                 }
                 //mRenderer.setXLabels(0);
                 mRenderer.setLabelsTextSize(25);
-                mRenderer.setXLabelsColor(R.color.Green);
+                mRenderer.setXLabelsAngle((float) 0.5);
+                //mRenderer.setXLabelsColor(R.color.Green);
                 mRenderer.setLabelsColor(R.color.Black);
 
                 mRenderer.addSeriesRenderer(renderer);
@@ -145,14 +167,22 @@ public class MountainStatisticsActivity extends AppCompatActivity {
 
                 Intent intent = ChartFactory.getLineChartIntent(getBaseContext(), dataset, mRenderer);
                 startActivity(intent);
-                return true;
+                break;
+            case R.id.menuSynchronizeGear:
+                AsyncSynchronizeGearTask asyncSynchronizeGearTask = new AsyncSynchronizeGearTask();
+                asyncSynchronizeGearTask .execute();
+                break;
+            case R.id.menuOverwrite:
+                AsyncOverwriteTableTask asyncOverwriteTableTask = new AsyncOverwriteTableTask();
+                asyncOverwriteTableTask.execute();
+                break;
         }
         return true;
     }
 
     public List<Gear> getAllEntries() {
         List<Gear> gearList = new ArrayList<>();
-        String selectQuery = "SELECT * FROM " + TABLE_GEAR + " ORDER BY " + COLUMN_DATE;
+        String selectQuery = "SELECT * FROM " + TABLE_GEAR + " ORDER BY " + COLUMN_DATE + " DESC";
 
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -211,11 +241,15 @@ public class MountainStatisticsActivity extends AppCompatActivity {
     }
 
     private void deleteEntry(long id) {
-        Toast.makeText(getApplicationContext(), id + " ", Toast.LENGTH_SHORT).show();
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
         db.delete(TABLE_GEAR, COLUMN_ID + " = ?", new String[] {Integer.toString(gearList.get((int) id).getId())});
         db.close();
         refreshList();
+    }
+
+    private void truncateTable() {
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        db.delete(TABLE_GEAR, "1", null);
     }
 
     private void refreshList() {
@@ -277,6 +311,118 @@ public class MountainStatisticsActivity extends AppCompatActivity {
 
         private NumberPicker getNumberPicker() {
             return picker;
+        }
+    }
+
+    public class AsyncSynchronizeGearTask extends AsyncTask {
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            HttpURLConnection httpURLConnection = null;
+            try {
+                new Socket().connect(new InetSocketAddress("192.168.2.102", 80), 2000);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+
+            String address = "http://192.168.2.102/android/php/synchronizeGear.php";
+            try {
+                URL url = new URL(address);
+                httpURLConnection = (HttpURLConnection) url.openConnection();
+                httpURLConnection.setRequestMethod("POST");
+                httpURLConnection.setDoOutput(true);
+                httpURLConnection.setDoInput(true);
+                httpURLConnection.connect();
+
+                String json = new Gson().toJson(gearList);
+                DataOutputStream os = new DataOutputStream(httpURLConnection.getOutputStream());
+                os.writeBytes(json);
+                os.flush();
+                os.close();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (httpURLConnection != null) {
+                    httpURLConnection.disconnect();
+                }
+            }
+            return null;
+        }
+    }
+
+    public class AsyncOverwriteTableTask extends AsyncTask {
+        @Override
+        protected void onPreExecute() {
+            progressBar.setVisibility(ProgressBar.VISIBLE);
+        }
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            HttpURLConnection httpURLConnection = null;
+            BufferedReader bufferedReader;
+            try {
+                new Socket().connect(new InetSocketAddress("192.168.2.102", 80), 2000);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+
+            String address = "http://192.168.2.102/android/php/getGear.php";
+            try {
+                URL url = new URL(address);
+                httpURLConnection = (HttpURLConnection) url.openConnection();
+
+                InputStream input = httpURLConnection.getInputStream();
+                if(input==null) {
+                    return null;
+                }
+                bufferedReader = new BufferedReader(new InputStreamReader(input));
+                String line, result="";
+                while((line = bufferedReader.readLine()) != null) {
+                    result += line;
+                }
+                return new JSONArray(result);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } finally {
+                if (httpURLConnection != null) {
+                    httpURLConnection.disconnect();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object result) {
+            try {
+                JSONArray json = (JSONArray) result;
+                if(json!=null) {
+                    truncateTable();
+                }
+                for(int i=0; i<json.length(); i++) {
+                    JSONObject jo = (JSONObject) json.get(i);
+                    Gear gear = new Gear(jo.getInt("id"), new SimpleDateFormat("yyyy-MM-dd").parse(jo.getString("date")), jo.getInt("gear"));
+                    insertEntry(gear);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            progressBar.setVisibility(ProgressBar.INVISIBLE);
+            refreshList();
+        }
+
+        @Override
+        protected void onProgressUpdate(Object[] progress) {
+            progressBar.setProgress((int) progress[0]);
         }
     }
 }

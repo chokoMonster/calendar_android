@@ -11,4 +11,11 @@
             android:layout_weight="1"/>
     </TableRow>
 
+    <TableRow>
+        <ProgressBar
+            android:id="@+id/progressBarGear"
+            android:textAlignment="center"
+            android:layout_weight="1"/>
+    </TableRow>
+
 </TableLayout>

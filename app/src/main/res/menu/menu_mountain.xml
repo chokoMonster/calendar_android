@@ -9,4 +9,10 @@
     <item
         android:id="@+id/menuNewMountain"
         android:title="New Entry" />
+    <item
+        android:id="@+id/menuSynchronizeGear"
+        android:title="Synchronisieren" />
+    <item
+        android:id="@+id/menuOverwrite"
+        android:title="Daten überschreiben" />
 </menu>
