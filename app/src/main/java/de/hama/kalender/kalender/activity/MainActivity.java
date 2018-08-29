@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btnKalender;
     private ImageButton btnMountain;
     private Button btnMountainStatistics;
+    private ImageButton btnSnooze;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +35,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         btnMountainStatistics = findViewById(R.id.btnMountainStatistics);
         btnMountainStatistics.setOnClickListener(this);
+
+        btnSnooze = findViewById(R.id.btnSnooze);
+        btnSnooze.setOnClickListener(this);
     }
 
     @Override
@@ -41,15 +45,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(view==btnKalender) {
             startActivity(new Intent(MainActivity.this, KalenderActivity.class));
         } else if(view==btnMountain) {
-            CustomDialog customDialog = new CustomDialog();
+            MountainDialog customDialog = new MountainDialog();
             customDialog.show(getSupportFragmentManager(), "MOUNTAIN");
         } else if(view==btnMountainStatistics) {
             startActivity(new Intent(MainActivity.this, MountainStatisticsActivity.class));
+        } else if(view==btnSnooze) {
+            SnoozeDialog customDialog = new SnoozeDialog();
+            customDialog.show(getSupportFragmentManager(), "SNOOZE");
         }
     }
 
-    public static class CustomDialog extends DialogFragment {
-
+    public static class MountainDialog extends DialogFragment {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             final SharedPreferences shared = getContext().getSharedPreferences("MOUNTAIN", 0);
@@ -76,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     })
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            CustomDialog.this.getDialog().cancel();
+                            MountainDialog.this.getDialog().cancel();
                         }
                     });
 
@@ -97,6 +103,81 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if(!txtCount.getText().toString().equals("0")) {
                         int value = Integer.parseInt(txtCount.getText().toString())-1;
                         txtCount.setText(Integer.toString(value));
+                    }
+                }
+            });
+            return builder.create();
+        }
+    }
+
+
+    public static class SnoozeDialog extends DialogFragment {
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final SharedPreferences shared = getContext().getSharedPreferences("SNOOZE", 0);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+            View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_snooze, null);
+
+            final EditText txtS1 = view.findViewById(R.id.txtS1);
+            final EditText txtS2 = view.findViewById(R.id.txtS2);
+            Button btnPlusS1 = view.findViewById(R.id.btnPlusS1);
+            Button btnMinusS1 = view.findViewById(R.id.btnMinusS1);
+            Button btnPlusS2 = view.findViewById(R.id.btnPlusS2);
+            Button btnMinusS2 = view.findViewById(R.id.btnMinusS2);
+
+            builder.setView(view)
+                    .setTitle("Snooze")
+                    .setIcon(R.drawable.clock1)
+                    .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            SharedPreferences.Editor editor = shared.edit();
+                            editor.putString("PLAYER1", txtS1.getText().toString());
+                            editor.putString("PLAYER2", txtS2.getText().toString());
+                            editor.apply();
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            SnoozeDialog.this.getDialog().cancel();
+                        }
+                    });
+
+            txtS1.setText(shared.getString("PLAYER1", "0"));
+            txtS2.setText(shared.getString("PLAYER2", "0"));
+            txtS1.setEnabled(false);
+            txtS2.setEnabled(false);
+
+            btnPlusS1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int value = Integer.parseInt(txtS1.getText().toString())+1;
+                    txtS1.setText(Integer.toString(value));
+                }
+            });
+            btnMinusS1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(!txtS1.getText().toString().equals("0")) {
+                        int value = Integer.parseInt(txtS1.getText().toString())-1;
+                        txtS1.setText(Integer.toString(value));
+                    }
+                }
+            });
+            btnPlusS2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int value = Integer.parseInt(txtS2.getText().toString())+1;
+                    txtS2.setText(Integer.toString(value));
+                }
+            });
+            btnMinusS2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(!txtS2.getText().toString().equals("0")) {
+                        int value = Integer.parseInt(txtS2.getText().toString())-1;
+                        txtS2.setText(Integer.toString(value));
                     }
                 }
             });

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <TableRow
+        android:layout_marginTop="20dp">
+        <TextView
+            android:text="Martin"
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="20dp"
+            android:layout_span="2"/>
+        <TextView
+            android:text="Katja"
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="20dp"
+            android:layout_span="2"/>
+    </TableRow>
+
+    <TableRow>
+        <EditText
+            android:id="@+id/txtS1"
+            android:inputType="date"
+            android:text="01.01.2018"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_span="2"
+            android:textAlignment="center"/>
+        <EditText
+            android:id="@+id/txtS2"
+            android:text="0"
+            android:inputType="number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_span="2"
+            android:textAlignment="center"/>
+    </TableRow>
+
+    <TableRow>
+        <Button
+            android:id="@+id/btnMinusS1"
+            android:text="-"
+            android:layout_width="50dp"
+            android:layout_marginLeft="10dp"/>
+        <Button
+            android:id="@+id/btnPlusS1"
+            android:text="+"
+            android:layout_width="50dp"/>
+        <Button
+            android:id="@+id/btnMinusS2"
+            android:text="-"
+            android:layout_width="50dp"
+            android:layout_marginLeft="10dp"/>
+        <Button
+            android:id="@+id/btnPlusS2"
+            android:text="+"
+            android:layout_width="50dp"/>
+    </TableRow>
+</TableLayout>
