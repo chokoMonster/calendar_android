@@ -57,7 +57,7 @@ public class EntryAdapter extends BaseAdapter {
 
         CalendarCollection entry = entries.get(i);
         viewHolder.lblTime.setText(String.format("%s - %s", entry.getStart(), entry.getEnd()));
-        viewHolder.lblDescription.setText(entry.getComment());
+        viewHolder.lblDescription.setText(entry.getNote());
 
         if(entry.getType()!=null) {
             viewHolder.imageView.setImageResource(this.getMipmapIdByName(entry.getType().toString().toLowerCase()));

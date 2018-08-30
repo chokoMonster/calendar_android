@@ -62,8 +62,16 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
     private static String DATABASE = "my_database";
     private static String TABLE_ENTRIES = "entries";
     private static String COLUMN_ID = "id";
-    private static String COLUMN_DATE = "date";
     private static String COLUMN_USER = "user";
+    private static String COLUMN_DATE = "date";
+    private static String COLUMN_TYPE = "type";
+    private static String COLUMN_INTENSITY = "intensity";
+    private static String COLUMN_START = "start";
+    private static String COLUMN_END = "end";
+    private static String COLUMN_LEAGUE = "league";
+    private static String COLUMN_AGE = "age";
+    private static String COLUMN_COACH = "coach";
+    private static String COLUMN_NOTE = "note";
     private DatabaseHelper databaseHelper;
 
     @Override
@@ -304,6 +312,14 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
         values.put(COLUMN_ID, getNextId(collection.getFormattedDate(), collection.getUser()));
         values.put(COLUMN_DATE, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(collection.getOriginalDate()));
         values.put(COLUMN_USER, collection.getUser());
+        values.put(COLUMN_TYPE, collection.getType().getValue());
+        values.put(COLUMN_INTENSITY, Integer.toString(collection.getIntensity()));
+        values.put(COLUMN_START, collection.getStart());
+        values.put(COLUMN_END, collection.getEnd());
+        values.put(COLUMN_LEAGUE, collection.getLeague());
+        values.put(COLUMN_AGE, collection.getAge());
+        values.put(COLUMN_COACH, collection.getCoach());
+        values.put(COLUMN_NOTE, collection.getNote());
         db.insert(TABLE_ENTRIES, null, values);
     }
 
@@ -356,8 +372,17 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
         public void onCreate(SQLiteDatabase db) {
             //TODO
             String script = "CREATE TABLE " + TABLE_ENTRIES + "("
-                    + COLUMN_ID + " INTEGER PRIMARY KEY," + COLUMN_DATE + " DATETIME,"
-                    + COLUMN_USER + " INTEGER)";
+                    + COLUMN_ID + " INTEGER PRIMARY KEY, " + COLUMN_DATE + " DATETIME PRIMARY KEY, "
+                    + COLUMN_USER + " VARCHAR PRIMARY KEY, " + COLUMN_TYPE + " VARCHAR)";
+
+            /*values.put(COLUMN_TYPE, collection.getType().getValue());
+        values.put(COLUMN_INTENSITY, Integer.toString(collection.getIntensity()));
+        values.put(COLUMN_START, collection.getStart());
+        values.put(COLUMN_END, collection.getEnd());
+        values.put(COLUMN_LEAGUE, collection.getLeague());
+        values.put(COLUMN_AGE, collection.getAge());
+        values.put(COLUMN_COACH, collection.getCoach());
+        values.put(COLUMN_NOTE, collection.getNote());*/
             db.execSQL(script);
         }
 
@@ -447,7 +472,7 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
                     //TODO
                     CalendarCollection collection = new CalendarCollection(jo.getInt("ID"), jo.getString("BENUTZER"), new SimpleDateFormat("yyyy-MM-dd").parse(jo.getString("DATUM")));
                     collection.setType(CategoryEnum.valueOf(jo.getString("ART")));
-                    collection.setComment(jo.getString("BEMERKUNG"));
+                    collection.setNote(jo.getString("BEMERKUNG"));
                     if(collection.getType().equals("SPIEL")) {
                         //TODO Gegner
                     }
@@ -527,7 +552,7 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
                     JSONObject jo = (JSONObject) json.get(i);
                     CalendarCollection collection = new CalendarCollection(jo.getInt("id"), jo.getString("user"), new SimpleDateFormat("yyyy-MM-dd").parse(jo.getString("date")));
 
-                    /*collection.setComment(jo.getString("comment"));
+                    /*collection.setNote(jo.getString("comment"));
                     collection.setLeague(jo.getString("league"));
                     collection.setAge(jo.getString("age"));
                     collection.setCoach(jo.getString("coach"));
@@ -536,8 +561,8 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
                     collection.setType(CategoryEnum.valueOf(jo.getString("type")));
                     collection.setIntensity(jo.getInt("intensity"));*/
 
-                    collection.setType(CategoryEnum.valueOf(jo.getString("ART")));
-                    collection.setComment(jo.getString("BEMERKUNG"));
+                    collection.setType(CategoryEnum.valueOf(jo.getString("KATEGORIE")));
+                    collection.setNote(jo.getString("BEMERKUNG"));
                     if(collection.getType().equals("SPIEL")) {
                         //TODO Gegner
                     }

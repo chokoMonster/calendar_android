@@ -49,7 +49,7 @@ public class EntryDialog extends DialogFragment {
         txtEnd.setText(entry.getEnd());
         txtType.setText(entry.getType().getValue());
         //sliderIntensity.setProgress(entry.getIntensity());
-        txtComment.setText(entry.getComment());
+        txtComment.setText(entry.getNote());
 
         btnSave = view.findViewById(R.id.btnSave);
         btnSave.setVisibility(View.INVISIBLE);

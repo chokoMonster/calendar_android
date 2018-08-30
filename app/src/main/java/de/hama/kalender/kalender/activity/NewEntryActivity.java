@@ -132,7 +132,7 @@ public class NewEntryActivity extends AppCompatActivity implements View.OnClickL
         entry.setStart(txtStart.getText().toString());
         entry.setEnd(txtEnd.getText().toString());
         entry.setIntensity(sliderIntensity.getProgress());
-        entry.setComment(txtComment.getText().toString());
+        entry.setNote(txtComment.getText().toString());
 
         Gson gson = new Gson();
         String json = gson.toJson(entry);
@@ -144,6 +144,6 @@ public class NewEntryActivity extends AppCompatActivity implements View.OnClickL
         txtEnd.setText(entry.getEnd());
         txtType.setText(entry.getType().getValue());
         //sliderIntensity.setProgress(entry.getIntensity());
-        txtComment.setText(entry.getComment());
+        txtComment.setText(entry.getNote());
     }
 }
