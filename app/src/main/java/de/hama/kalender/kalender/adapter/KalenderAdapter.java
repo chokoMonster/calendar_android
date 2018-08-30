@@ -9,8 +9,8 @@ import android.widget.TextView;
 import java.util.Arrays;
 import java.util.List;
 
-import de.hama.kalender.kalender.CalendarCollection;
 import de.hama.kalender.kalender.R;
+import de.hama.kalender.kalender.entity.CalendarCollection;
 
 public class KalenderAdapter extends BaseAdapter {
 

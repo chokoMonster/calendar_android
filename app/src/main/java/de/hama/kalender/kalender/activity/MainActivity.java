@@ -8,10 +8,14 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import de.hama.kalender.kalender.R;
 
@@ -38,6 +42,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         btnSnooze = findViewById(R.id.btnSnooze);
         btnSnooze.setOnClickListener(this);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menuPlayer:
+                PlayerDialog customDialog = new PlayerDialog();
+                customDialog.show(getSupportFragmentManager(), "PLAYER");
+                return true;
+        }
+        return true;
     }
 
     @Override
@@ -114,11 +135,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static class SnoozeDialog extends DialogFragment {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-            final SharedPreferences shared = getContext().getSharedPreferences("SNOOZE", 0);
+            final SharedPreferences shared_snooze = getContext().getSharedPreferences("SNOOZE", 0);
+            final SharedPreferences shared_players = getContext().getSharedPreferences("PLAYER", 0);
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
             View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_snooze, null);
 
+            TextView lblS1 = view.findViewById(R.id.lblS1);
+            TextView lblS2 = view.findViewById(R.id.lblS2);
             final EditText txtS1 = view.findViewById(R.id.txtS1);
             final EditText txtS2 = view.findViewById(R.id.txtS2);
             Button btnPlusS1 = view.findViewById(R.id.btnPlusS1);
@@ -132,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .setPositiveButton("Save", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int id) {
-                            SharedPreferences.Editor editor = shared.edit();
+                            SharedPreferences.Editor editor = shared_snooze.edit();
                             editor.putString("PLAYER1", txtS1.getText().toString());
                             editor.putString("PLAYER2", txtS2.getText().toString());
                             editor.apply();
@@ -144,8 +168,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     });
 
-            txtS1.setText(shared.getString("PLAYER1", "0"));
-            txtS2.setText(shared.getString("PLAYER2", "0"));
+            lblS1.setText(shared_players.getString("PLAYER1", "0"));
+            lblS2.setText(shared_players.getString("PLAYER2", "0"));
+            txtS1.setText(shared_snooze.getString("PLAYER1", "0"));
+            txtS2.setText(shared_snooze.getString("PLAYER2", "0"));
             txtS1.setEnabled(false);
             txtS2.setEnabled(false);
 
@@ -181,6 +207,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
             });
+            return builder.create();
+        }
+    }
+
+
+    public static class PlayerDialog extends DialogFragment {
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final SharedPreferences shared = getContext().getSharedPreferences("PLAYER", 0);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+            View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_player, null);
+
+            final EditText txtPlayer1 = view.findViewById(R.id.txtPlayer1);
+            final EditText txtPlayer2 = view.findViewById(R.id.txtPlayer2);
+
+            builder.setView(view)
+                    .setTitle("Players")
+                    .setIcon(R.drawable.players1)
+                    .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            SharedPreferences.Editor editor = shared.edit();
+                            editor.putString("PLAYER1", txtPlayer1.getText().toString());
+                            editor.putString("PLAYER2", txtPlayer2.getText().toString());
+                            editor.apply();//.commit()?
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            PlayerDialog.this.getDialog().cancel();
+                        }
+                    });
+            txtPlayer1.setText(shared.getString("PLAYER1", ""));
+            txtPlayer2.setText(shared.getString("PLAYER2", ""));
             return builder.create();
         }
     }

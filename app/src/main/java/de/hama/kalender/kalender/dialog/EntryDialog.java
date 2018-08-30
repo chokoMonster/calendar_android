@@ -11,9 +11,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 
-import de.hama.kalender.kalender.CalendarCollection;
 import de.hama.kalender.kalender.R;
 import de.hama.kalender.kalender.activity.NewEntryActivity;
+import de.hama.kalender.kalender.entity.CalendarCollection;
 
 public class EntryDialog extends DialogFragment {
 
@@ -30,7 +30,6 @@ public class EntryDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-        int test = getArguments().getInt("test");
         entry = (CalendarCollection) getArguments().getSerializable("entry");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -53,22 +52,9 @@ public class EntryDialog extends DialogFragment {
         txtComment.setText(entry.getComment());
 
         btnSave = view.findViewById(R.id.btnSave);
-        /*btnSave.setText("Bearbeiten");
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });*/
         btnSave.setVisibility(View.INVISIBLE);
         btnCancel = view.findViewById(R.id.btnCancel);
         btnCancel.setVisibility(View.INVISIBLE);
-        /*btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                EntryDialog.this.getDialog().cancel();
-            }
-        });*/
 
         builder.setView(view)
                 .setTitle(entry.getType().getValue())

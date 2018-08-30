@@ -19,10 +19,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-import de.hama.kalender.kalender.CalendarCollection;
 import de.hama.kalender.kalender.CategoryEnum;
 import de.hama.kalender.kalender.dialog.EntryDialog;
 import de.hama.kalender.kalender.R;
+import de.hama.kalender.kalender.entity.CalendarCollection;
 
 public class NewEntryActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -123,7 +123,7 @@ public class NewEntryActivity extends AppCompatActivity implements View.OnClickL
     };
 
     private void saveEntry() {
-        CalendarCollection entry = new CalendarCollection("gerkat", calendar.getTime());
+        CalendarCollection entry = new CalendarCollection(1,"gerkat", calendar.getTime());
         for (CategoryEnum e: CategoryEnum.values()) {
             if(e.getValue().equals(txtType.getText().toString())) {
                 entry.setType(e);

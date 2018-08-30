@@ -7,13 +7,15 @@
     <TableRow
         android:layout_marginTop="20dp">
         <TextView
-            android:text="Martin"
+            android:id="@+id/lblS1"
+            android:text=""
             android:layout_width="wrap_content"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="20dp"
             android:layout_span="2"/>
         <TextView
-            android:text="Katja"
+            android:id="@+id/lblS2"
+            android:text=""
             android:layout_width="wrap_content"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="20dp"

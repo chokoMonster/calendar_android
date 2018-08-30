@@ -26,7 +26,6 @@ import android.widget.DatePicker;
 import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -56,8 +55,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import de.hama.kalender.kalender.CalendarCollection;
-import de.hama.kalender.kalender.CategoryEnum;
 import de.hama.kalender.kalender.R;
 import de.hama.kalender.kalender.entity.Gear;
 
@@ -172,7 +169,7 @@ public class MountainStatisticsActivity extends AppCompatActivity {
                 AsyncSynchronizeGearTask asyncSynchronizeGearTask = new AsyncSynchronizeGearTask();
                 asyncSynchronizeGearTask .execute();
                 break;
-            case R.id.menuOverwrite:
+            case R.id.menuOverwriteGear:
                 AsyncOverwriteTableTask asyncOverwriteTableTask = new AsyncOverwriteTableTask();
                 asyncOverwriteTableTask.execute();
                 break;

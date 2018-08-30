@@ -13,4 +13,10 @@
     <item
         android:id="@+id/menuNew"
         android:title="New Entry" />
+    <item
+        android:id="@+id/menuSynchronizeData"
+        android:title="Synchronisieren" />
+    <item
+        android:id="@+id/menuOverwriteData"
+        android:title="Daten überschreiben" />
 </menu>

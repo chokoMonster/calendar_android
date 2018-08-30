@@ -1,18 +1,29 @@
-package de.hama.kalender.kalender;
+package de.hama.kalender.kalender.entity;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import de.hama.kalender.kalender.CategoryEnum;
+
 public class CalendarCollection implements Serializable {
     private String user, comment, league, age, coach, start, end;
     private CategoryEnum type;
-    private Integer intensity;
+    private Integer id, intensity;
     private Date date;
 
-    public CalendarCollection(String user, Date date) {
+    public CalendarCollection(Integer id, String user, Date date) {
+        this.id = id;
         this.user = user;
         this.date = date;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getUser() {

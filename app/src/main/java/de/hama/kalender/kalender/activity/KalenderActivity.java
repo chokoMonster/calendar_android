@@ -1,7 +1,12 @@
 package de.hama.kalender.kalender.activity;
 
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -37,26 +42,36 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import de.hama.kalender.kalender.CalendarCollection;
 import de.hama.kalender.kalender.CategoryEnum;
 import de.hama.kalender.kalender.adapter.EntryAdapter;
 import de.hama.kalender.kalender.dialog.EntryDialog;
 import de.hama.kalender.kalender.adapter.KalenderAdapter;
 import de.hama.kalender.kalender.R;
+import de.hama.kalender.kalender.entity.CalendarCollection;
 
 public class KalenderActivity extends AppCompatActivity implements View.OnClickListener { //FragmentActivity {
 
-    private ArrayList<CalendarCollection> entries = new ArrayList<>();
+    private List<CalendarCollection> entries = new ArrayList<>();
     private Calendar calendar = Calendar.getInstance();
 
+    private GridView gridview;
     private Button btnPrevious, btnNext;
     private float positionX=1000;
+    private List<String> days;
+
+    private static String DATABASE = "my_database";
+    private static String TABLE_ENTRIES = "entries";
+    private static String COLUMN_ID = "id";
+    private static String COLUMN_DATE = "date";
+    private static String COLUMN_USER = "user";
+    private DatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kalender);
 
+        gridview = findViewById(R.id.gridview);
         btnPrevious = findViewById(R.id.btnPrevious);
         btnNext = findViewById(R.id.btnNext);
         btnPrevious.setOnClickListener(this);
@@ -83,6 +98,10 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
             case R.id.menuNew:
                 startActivity(new Intent(KalenderActivity.this, NewEntryActivity.class));
                 return true;
+            case R.id.menuOverwriteData:
+                AsyncOverwriteTableTask asyncOverwriteTableTask = new AsyncOverwriteTableTask();
+                asyncOverwriteTableTask.execute();
+                return true;
         }
         return true;
     }
@@ -107,13 +126,13 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
             d3 = new SimpleDateFormat("dd.MM.yyyy").parse("23.07.2018");
         } catch(ParseException e) {}
 
-        CalendarCollection c = new CalendarCollection("edvgerstk", d);
-        CalendarCollection c1 = new CalendarCollection("test2",  d1);
-        CalendarCollection c2 = new CalendarCollection("edvgerstk", d1);
-        CalendarCollection c3 = new CalendarCollection("test2",  d);
-        CalendarCollection c4 = new CalendarCollection("test2",  d3);
-        CalendarCollection c5 = new CalendarCollection("test2",  d2);
-        CalendarCollection c6 = new CalendarCollection("test2",  d2);
+        CalendarCollection c = new CalendarCollection(1,  "gerkat", d);
+        CalendarCollection c1 = new CalendarCollection(1, "test2",  d1);
+        CalendarCollection c2 = new CalendarCollection(1,"gerkat", d1);
+        CalendarCollection c3 = new CalendarCollection(1, "test2",  d);
+        CalendarCollection c4 = new CalendarCollection(1, "test2",  d3);
+        CalendarCollection c5 = new CalendarCollection(1, "test2",  d2);
+        CalendarCollection c6 = new CalendarCollection(2, "test2",  d2);
         c.setType(CategoryEnum.BASKETBALL);
         c1.setType(CategoryEnum.SWIMMING);
         c2.setType(CategoryEnum.RUNNING);
@@ -144,7 +163,6 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
         entries.add(c6);
 
 
-
         //AsyncCalendarTask asyncCalendarTask = new AsyncCalendarTask();
         //asyncCalendarTask.execute("gerkat", calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.YEAR));
 
@@ -157,14 +175,13 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
         }*/
     }
 
-    public ArrayList<CalendarCollection> getEntries() {
+    public List<CalendarCollection> getEntries() {
         return entries;
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private void createCalendar() {
-        List<String> days = new ArrayList<>();
-
+        days = new ArrayList<>();
         days.addAll(Arrays.asList(getResources().getStringArray(R.array.weekdays)));
 
         int placeholder = calendar.get(Calendar.DAY_OF_WEEK) - 2;
@@ -178,7 +195,6 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
             days.add(Integer.toString(i));
         }
 
-        GridView gridview = findViewById(R.id.gridview);
         gridview.setAdapter(new KalenderAdapter(this, days, entries));
         gridview.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -263,6 +279,94 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
         showSelectedEntries(new ArrayList<CalendarCollection>());
     }
 
+    public List<CalendarCollection> getAllEntries() {
+        List<CalendarCollection> collections = new ArrayList<>();
+        String selectQuery = "SELECT * FROM " + TABLE_ENTRIES + " WHERE " + COLUMN_USER + " = ? ORDER BY " + COLUMN_DATE + " DESC, " + COLUMN_ID + " ASC";
+
+        SQLiteDatabase db = databaseHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, new String[] {"gerkat"});
+
+        if (cursor.moveToFirst()) {
+            do {
+                try {
+                    collections.add(new CalendarCollection(cursor.getInt(0), cursor.getString(1), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(cursor.getString(2))));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            } while (cursor.moveToNext());
+        }
+        return collections;
+    }
+
+    private void insertEntry(CalendarCollection collection) {
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_ID, getNextId(collection.getFormattedDate(), collection.getUser()));
+        values.put(COLUMN_DATE, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(collection.getOriginalDate()));
+        values.put(COLUMN_USER, collection.getUser());
+        db.insert(TABLE_ENTRIES, null, values);
+    }
+
+    private int getNextId(String date, String user) {
+        String selectQuery = "SELECT max(" + COLUMN_ID + ") FROM " + TABLE_ENTRIES + " WHERE " + COLUMN_DATE + " = ? AND " + COLUMN_USER + " = ?";
+
+        SQLiteDatabase db = databaseHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, new String[] {date, user});
+        cursor.moveToFirst();
+
+        return cursor.getInt(0)+1;
+    }
+
+    private void deleteEntry(long id) {
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        db.delete(TABLE_ENTRIES, COLUMN_ID + " = ? AND " + COLUMN_DATE + " = ? AND " + COLUMN_USER + " = ?",
+                new String[] {Integer.toString(entries.get((int) id).getId()), entries.get((int) id).getFormattedDate(), entries.get((int) id).getUser()});
+        db.close();
+        refreshList();
+    }
+
+    private void truncateTable() {
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        db.delete(TABLE_ENTRIES, "1", null);
+    }
+
+    private void refreshList() {
+        days = new ArrayList<>();
+        days.addAll(Arrays.asList(getResources().getStringArray(R.array.weekdays)));
+
+        int placeholder = calendar.get(Calendar.DAY_OF_WEEK) - 2;
+        if(placeholder<0) {
+            placeholder=6;
+        }
+        for (int i=0; i<placeholder; i++) {
+            days.add("");
+        }
+        for (int i=1; i<=calendar.getActualMaximum(Calendar.DAY_OF_MONTH); i++) {
+            days.add(Integer.toString(i));
+        }
+        gridview.setAdapter(new KalenderAdapter(this, days, getAllEntries()));
+    }
+
+    public class DatabaseHelper extends SQLiteOpenHelper {
+        public DatabaseHelper(Context context) {
+            super(context, DATABASE, null, 1);
+        }
+
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            //TODO
+            String script = "CREATE TABLE " + TABLE_ENTRIES + "("
+                    + COLUMN_ID + " INTEGER PRIMARY KEY," + COLUMN_DATE + " DATETIME,"
+                    + COLUMN_USER + " INTEGER)";
+            db.execSQL(script);
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            //db.execSQL("DROP TABLE IF EXISTS " + TABLE_GEAR);
+            //onCreate(db);
+        }
+    }
 
 
     public class AsyncCalendarTask extends AsyncTask {
@@ -341,7 +445,7 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
                 for(int i=0; i<json.length(); i++) {
                     JSONObject jo = (JSONObject) json.get(i);
                     //TODO
-                    CalendarCollection collection = new CalendarCollection(jo.getString("BENUTZER"), new SimpleDateFormat("yyyy-MM-dd").parse(jo.getString("DATUM")));
+                    CalendarCollection collection = new CalendarCollection(jo.getInt("ID"), jo.getString("BENUTZER"), new SimpleDateFormat("yyyy-MM-dd").parse(jo.getString("DATUM")));
                     collection.setType(CategoryEnum.valueOf(jo.getString("ART")));
                     collection.setComment(jo.getString("BEMERKUNG"));
                     if(collection.getType().equals("SPIEL")) {
@@ -363,6 +467,103 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
                 e.printStackTrace();
             }
             entries = new ArrayList<>(lstJson);
+        }
+    }
+
+
+    public class AsyncOverwriteTableTask extends AsyncTask {
+        @Override
+        protected void onPreExecute() {
+            //progressBar.setVisibility(ProgressBar.VISIBLE);
+        }
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            HttpURLConnection httpURLConnection = null;
+            BufferedReader bufferedReader;
+            try {
+                new Socket().connect(new InetSocketAddress("192.168.2.102", 80), 2000);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+
+            String address = "http://192.168.2.102/android/php/getData.php";
+            try {
+                URL url = new URL(address);
+                httpURLConnection = (HttpURLConnection) url.openConnection();
+
+                InputStream input = httpURLConnection.getInputStream();
+                if(input==null) {
+                    return null;
+                }
+                bufferedReader = new BufferedReader(new InputStreamReader(input));
+                String line, result="";
+                while((line = bufferedReader.readLine()) != null) {
+                    result += line;
+                }
+                return new JSONArray(result);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } finally {
+                if (httpURLConnection != null) {
+                    httpURLConnection.disconnect();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object result) {
+            try {
+                JSONArray json = (JSONArray) result;
+                if(json!=null) {
+                    truncateTable();
+                }
+                for(int i=0; i<json.length(); i++) {
+                    JSONObject jo = (JSONObject) json.get(i);
+                    CalendarCollection collection = new CalendarCollection(jo.getInt("id"), jo.getString("user"), new SimpleDateFormat("yyyy-MM-dd").parse(jo.getString("date")));
+
+                    /*collection.setComment(jo.getString("comment"));
+                    collection.setLeague(jo.getString("league"));
+                    collection.setAge(jo.getString("age"));
+                    collection.setCoach(jo.getString("coach"));
+                    collection.setStart(jo.getString("start"));
+                    collection.setEnd(jo.getString("end"));
+                    collection.setType(CategoryEnum.valueOf(jo.getString("type")));
+                    collection.setIntensity(jo.getInt("intensity"));*/
+
+                    collection.setType(CategoryEnum.valueOf(jo.getString("ART")));
+                    collection.setComment(jo.getString("BEMERKUNG"));
+                    if(collection.getType().equals("SPIEL")) {
+                        //TODO Gegner
+                    }
+                    collection.setLeague(jo.getString("LIGA"));
+                    collection.setAge(jo.getString("ALTERSKLASSE"));
+                    collection.setCoach(jo.getString("TRAINER"));
+                    collection.setStart(jo.getString("BEGINN"));
+                    collection.setEnd(jo.getString("ENDE"));
+                    collection.setIntensity(jo.getInt("INTENSITAET"));
+
+                    insertEntry(collection);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            //progressBar.setVisibility(ProgressBar.INVISIBLE);
+            refreshList();
+        }
+
+        @Override
+        protected void onProgressUpdate(Object[] progress) {
+            //progressBar.setProgress((int) progress[0]);
         }
     }
 }

@@ -13,6 +13,6 @@
         android:id="@+id/menuSynchronizeGear"
         android:title="Synchronisieren" />
     <item
-        android:id="@+id/menuOverwrite"
+        android:id="@+id/menuOverwriteGear"
         android:title="Daten überschreiben" />
 </menu>
