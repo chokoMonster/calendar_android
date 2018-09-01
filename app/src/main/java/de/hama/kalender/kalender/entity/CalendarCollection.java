@@ -7,7 +7,7 @@ import java.util.Date;
 import de.hama.kalender.kalender.CategoryEnum;
 
 public class CalendarCollection implements Serializable {
-    private String user, note, league, age, coach, start, end;
+    private String user, note, league, age, coach, start, end, opponent;
     private CategoryEnum type;
     private Integer id, intensity;
     private Date date;
@@ -108,5 +108,13 @@ public class CalendarCollection implements Serializable {
 
     public void setEnd(String end) {
         this.end = end;
+    }
+
+    public String getOpponent() {
+        return opponent;
+    }
+
+    public void setOpponent(String opponent) {
+        this.opponent = opponent;
     }
 }

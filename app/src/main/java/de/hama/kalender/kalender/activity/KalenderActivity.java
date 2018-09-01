@@ -2,11 +2,9 @@ package de.hama.kalender.kalender.activity;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -44,6 +42,7 @@ import java.util.List;
 
 import de.hama.kalender.kalender.CategoryEnum;
 import de.hama.kalender.kalender.adapter.EntryAdapter;
+import de.hama.kalender.kalender.database.CalendarDatabaseHandler;
 import de.hama.kalender.kalender.dialog.EntryDialog;
 import de.hama.kalender.kalender.adapter.KalenderAdapter;
 import de.hama.kalender.kalender.R;
@@ -59,25 +58,15 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
     private float positionX=1000;
     private List<String> days;
 
-    private static String DATABASE = "my_database";
-    private static String TABLE_ENTRIES = "entries";
-    private static String COLUMN_ID = "id";
-    private static String COLUMN_USER = "user";
-    private static String COLUMN_DATE = "date";
-    private static String COLUMN_TYPE = "type";
-    private static String COLUMN_INTENSITY = "intensity";
-    private static String COLUMN_START = "start";
-    private static String COLUMN_END = "end";
-    private static String COLUMN_LEAGUE = "league";
-    private static String COLUMN_AGE = "age";
-    private static String COLUMN_COACH = "coach";
-    private static String COLUMN_NOTE = "note";
-    private DatabaseHelper databaseHelper;
+    private CalendarDatabaseHandler dbHandler;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kalender);
+
+        dbHandler = new CalendarDatabaseHandler(getApplicationContext());
 
         gridview = findViewById(R.id.gridview);
         btnPrevious = findViewById(R.id.btnPrevious);
@@ -287,65 +276,6 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
         showSelectedEntries(new ArrayList<CalendarCollection>());
     }
 
-    public List<CalendarCollection> getAllEntries() {
-        List<CalendarCollection> collections = new ArrayList<>();
-        String selectQuery = "SELECT * FROM " + TABLE_ENTRIES + " WHERE " + COLUMN_USER + " = ? ORDER BY " + COLUMN_DATE + " DESC, " + COLUMN_ID + " ASC";
-
-        SQLiteDatabase db = databaseHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, new String[] {"gerkat"});
-
-        if (cursor.moveToFirst()) {
-            do {
-                try {
-                    collections.add(new CalendarCollection(cursor.getInt(0), cursor.getString(1), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(cursor.getString(2))));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-            } while (cursor.moveToNext());
-        }
-        return collections;
-    }
-
-    private void insertEntry(CalendarCollection collection) {
-        SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_ID, getNextId(collection.getFormattedDate(), collection.getUser()));
-        values.put(COLUMN_DATE, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(collection.getOriginalDate()));
-        values.put(COLUMN_USER, collection.getUser());
-        values.put(COLUMN_TYPE, collection.getType().getValue());
-        values.put(COLUMN_INTENSITY, Integer.toString(collection.getIntensity()));
-        values.put(COLUMN_START, collection.getStart());
-        values.put(COLUMN_END, collection.getEnd());
-        values.put(COLUMN_LEAGUE, collection.getLeague());
-        values.put(COLUMN_AGE, collection.getAge());
-        values.put(COLUMN_COACH, collection.getCoach());
-        values.put(COLUMN_NOTE, collection.getNote());
-        db.insert(TABLE_ENTRIES, null, values);
-    }
-
-    private int getNextId(String date, String user) {
-        String selectQuery = "SELECT max(" + COLUMN_ID + ") FROM " + TABLE_ENTRIES + " WHERE " + COLUMN_DATE + " = ? AND " + COLUMN_USER + " = ?";
-
-        SQLiteDatabase db = databaseHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, new String[] {date, user});
-        cursor.moveToFirst();
-
-        return cursor.getInt(0)+1;
-    }
-
-    private void deleteEntry(long id) {
-        SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        db.delete(TABLE_ENTRIES, COLUMN_ID + " = ? AND " + COLUMN_DATE + " = ? AND " + COLUMN_USER + " = ?",
-                new String[] {Integer.toString(entries.get((int) id).getId()), entries.get((int) id).getFormattedDate(), entries.get((int) id).getUser()});
-        db.close();
-        refreshList();
-    }
-
-    private void truncateTable() {
-        SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        db.delete(TABLE_ENTRIES, "1", null);
-    }
-
     private void refreshList() {
         days = new ArrayList<>();
         days.addAll(Arrays.asList(getResources().getStringArray(R.array.weekdays)));
@@ -360,38 +290,9 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
         for (int i=1; i<=calendar.getActualMaximum(Calendar.DAY_OF_MONTH); i++) {
             days.add(Integer.toString(i));
         }
-        gridview.setAdapter(new KalenderAdapter(this, days, getAllEntries()));
+        gridview.setAdapter(new KalenderAdapter(this, days, dbHandler.getAllEntries()));
     }
 
-    public class DatabaseHelper extends SQLiteOpenHelper {
-        public DatabaseHelper(Context context) {
-            super(context, DATABASE, null, 1);
-        }
-
-        @Override
-        public void onCreate(SQLiteDatabase db) {
-            //TODO
-            String script = "CREATE TABLE " + TABLE_ENTRIES + "("
-                    + COLUMN_ID + " INTEGER PRIMARY KEY, " + COLUMN_DATE + " DATETIME PRIMARY KEY, "
-                    + COLUMN_USER + " VARCHAR PRIMARY KEY, " + COLUMN_TYPE + " VARCHAR)";
-
-            /*values.put(COLUMN_TYPE, collection.getType().getValue());
-        values.put(COLUMN_INTENSITY, Integer.toString(collection.getIntensity()));
-        values.put(COLUMN_START, collection.getStart());
-        values.put(COLUMN_END, collection.getEnd());
-        values.put(COLUMN_LEAGUE, collection.getLeague());
-        values.put(COLUMN_AGE, collection.getAge());
-        values.put(COLUMN_COACH, collection.getCoach());
-        values.put(COLUMN_NOTE, collection.getNote());*/
-            db.execSQL(script);
-        }
-
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            //db.execSQL("DROP TABLE IF EXISTS " + TABLE_GEAR);
-            //onCreate(db);
-        }
-    }
 
 
     public class AsyncCalendarTask extends AsyncTask {
@@ -474,7 +375,7 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
                     collection.setType(CategoryEnum.valueOf(jo.getString("ART")));
                     collection.setNote(jo.getString("BEMERKUNG"));
                     if(collection.getType().equals("SPIEL")) {
-                        //TODO Gegner
+                        collection.setOpponent(jo.getString("GEGNER"));
                     }
                     collection.setLeague(jo.getString("LIGA"));
                     collection.setAge(jo.getString("ALTERSKLASSE"));
@@ -546,7 +447,7 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
             try {
                 JSONArray json = (JSONArray) result;
                 if(json!=null) {
-                    truncateTable();
+                    dbHandler.truncateTable();
                 }
                 for(int i=0; i<json.length(); i++) {
                     JSONObject jo = (JSONObject) json.get(i);
@@ -557,14 +458,14 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
                     collection.setAge(jo.getString("age"));
                     collection.setCoach(jo.getString("coach"));
                     collection.setStart(jo.getString("start"));
-                    collection.setEnd(jo.getString("end"));
+                    collection.setEnd(jo.getString("ending"));
                     collection.setType(CategoryEnum.valueOf(jo.getString("type")));
                     collection.setIntensity(jo.getInt("intensity"));*/
 
                     collection.setType(CategoryEnum.valueOf(jo.getString("KATEGORIE")));
                     collection.setNote(jo.getString("BEMERKUNG"));
                     if(collection.getType().equals("SPIEL")) {
-                        //TODO Gegner
+                        collection.setOpponent(jo.getString("GEGNER"));
                     }
                     collection.setLeague(jo.getString("LIGA"));
                     collection.setAge(jo.getString("ALTERSKLASSE"));
@@ -573,7 +474,7 @@ public class KalenderActivity extends AppCompatActivity implements View.OnClickL
                     collection.setEnd(jo.getString("ENDE"));
                     collection.setIntensity(jo.getInt("INTENSITAET"));
 
-                    insertEntry(collection);
+                    dbHandler.insertEntry(collection);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
