@@ -16,7 +16,7 @@ import de.hama.kalender.kalender.entity.CalendarCollection;
 public class CalendarDatabaseHandler {
 
     private static String DATABASE = "my_database";
-    private static String TABLE = "entries";
+    private static String TABLE_ENTRIES = "entries";
     private static String COLUMN_ID = "id";
     private static String COLUMN_USER = "user";
     private static String COLUMN_DATE = "date";
@@ -39,7 +39,7 @@ public class CalendarDatabaseHandler {
 
     public List<CalendarCollection> getAllEntries() {
         List<CalendarCollection> collections = new ArrayList<>();
-        String selectQuery = "SELECT * FROM " + TABLE + " WHERE " + COLUMN_USER + " = ? ORDER BY " + COLUMN_DATE + " DESC, " + COLUMN_ID + " ASC";
+        String selectQuery = "SELECT * FROM " + TABLE_ENTRIES + " WHERE " + COLUMN_USER + " = ? ORDER BY " + COLUMN_DATE + " DESC, " + COLUMN_ID + " ASC";
 
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, new String[] {"gerkat"});
@@ -71,11 +71,11 @@ public class CalendarDatabaseHandler {
         values.put(COLUMN_COACH, collection.getCoach());
         values.put(COLUMN_OPPONENT, collection.getOpponent());
         values.put(COLUMN_NOTE, collection.getNote());
-        db.insert(TABLE, null, values);
+        db.insert(TABLE_ENTRIES, null, values);
     }
 
     public int getNextId(String date, String user) {
-        String selectQuery = "SELECT max(" + COLUMN_ID + ") FROM " + TABLE + " WHERE " + COLUMN_DATE + " = ? AND " + COLUMN_USER + " = ?";
+        String selectQuery = "SELECT max(" + COLUMN_ID + ") FROM " + TABLE_ENTRIES + " WHERE " + COLUMN_DATE + " = ? AND " + COLUMN_USER + " = ?";
 
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, new String[] {date, user});
@@ -86,14 +86,14 @@ public class CalendarDatabaseHandler {
 
     public void deleteEntry(CalendarCollection entry) {
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        db.delete(TABLE, COLUMN_ID + " = ? AND " + COLUMN_DATE + " = ? AND " + COLUMN_USER + " = ?",
+        db.delete(TABLE_ENTRIES, COLUMN_ID + " = ? AND " + COLUMN_DATE + " = ? AND " + COLUMN_USER + " = ?",
                 new String[] {Integer.toString(entry.getId()), entry.getFormattedDate(), entry.getUser()});
         db.close();
     }
 
     public void truncateTable() {
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        db.delete(TABLE, "1", null);
+        db.delete(TABLE_ENTRIES, "1", null);
     }
 
 
@@ -105,7 +105,7 @@ public class CalendarDatabaseHandler {
         @Override
         public void onCreate(SQLiteDatabase db) {
             //TODO
-            String script = "CREATE TABLE " + TABLE + "("
+            String script = "CREATE TABLE " + TABLE_ENTRIES + "("
                     + COLUMN_ID + " INTEGER PRIMARY KEY, " + COLUMN_DATE + " DATETIME PRIMARY KEY, " + COLUMN_USER + " TEXT PRIMARY KEY, "
                     + COLUMN_TYPE + " TEXT, " + COLUMN_INTENSITY + " INTEGER, " + COLUMN_START + " TEXT, " + COLUMN_END + " TEXT, "
                     + COLUMN_LEAGUE + " TEXT, " + COLUMN_AGE + " TEXT, " + COLUMN_COACH + " TEXT, " + COLUMN_OPPONENT + " TEXT, " + COLUMN_NOTE + " TEXT)";
@@ -115,7 +115,7 @@ public class CalendarDatabaseHandler {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            //db.execSQL("DROP TABLE IF EXISTS " + TABLE_GEAR);
+            //db.execSQL("DROP TABLE_ENTRIES IF EXISTS " + TABLE_ENTRIES);
             //onCreate(db);
         }
     }
